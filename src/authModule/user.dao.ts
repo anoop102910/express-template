@@ -33,8 +33,12 @@ const userSchema = new mongoose.Schema({
   googleProfile: {
     type: Object,
   },
-  emailVerificationToken: String,
-  emailVerificationExpires: Date
+  emailVerificationToken: {
+    type: String,
+  },
+  emailVerificationExpires: {
+    type: Date,
+  }
 }, {
   timestamps: true
 });

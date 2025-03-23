@@ -22,12 +22,24 @@ const env = cleanEnv(process.env, {
   JWT_ACCESS_TOKEN_EXPIRATION_TIME: num(),
   JWT_REFRESH_TOKEN_EXPIRATION_TIME: num(),
   VERIFICATION_EXPIRATION_TIME: num(),
+  DB_HOST: str({ default: 'localhost' }),
+  DB_PORT: num({ default: 5432 }),
+  DB_USER: str(),
+  DB_PASSWORD: str(),
+  DB_NAME: str(),
+  REDIS_HOST: str(),
+  REDIS_PORT: num(),
 });
 
 export const config = {
   port: env.PORT,
   database: {
     url: env.MONGODB_URI,
+    host: env.DB_HOST,
+    port: env.DB_PORT,
+    user: env.DB_USER,
+    password: env.DB_PASSWORD,
+    name: env.DB_NAME,
   },
   jwt: {
     accessTokenSecret: env.JWT_ACCESS_TOKEN_SECRET,
@@ -61,5 +73,9 @@ export const config = {
   },
   verification: {
     expirationTime: env.VERIFICATION_EXPIRATION_TIME,
+  },
+  redis: {
+    host: env.REDIS_HOST,
+    port: env.REDIS_PORT,
   },
 } as const;
