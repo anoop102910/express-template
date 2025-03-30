@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { HTTP_STATUS } from '../utils/httpStatus';
-import { UserDao } from '../authModule/user.dao';
-import { config } from '../config';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import { HTTP_STATUS } from "../utils/httpStatus";
+import { UserDao } from "../authModule/user.dao";
+import { config } from "../config";
 
 interface JwtPayload {
   userId: string;
@@ -17,29 +17,22 @@ declare global {
   }
 }
 
-export const authMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  // Get token from header
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader?.startsWith("Bearer ")) {
+    res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      status: "error",
+      message: "No token provided",
+    });
+    return;
+  }
+
+  const token = authHeader.split(" ")[1];
   try {
-    // Get token from header
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        status: 'error',
-        message: 'No token provided',
-      });
-      return;
-    }
-
-    const token = authHeader.split(' ')[1];
-
     // Verify token
-    const decoded = jwt.verify(
-      token,
-      config.jwt.accessTokenSecret
-    ) as JwtPayload;
+    const decoded = jwt.verify(token, config.jwt.accessTokenSecret) as JwtPayload;
 
     // Get user from token
     const userDao = new UserDao();
@@ -47,8 +40,8 @@ export const authMiddleware = async (
 
     if (!user) {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        status: 'error',
-        message: 'User not found',
+        status: "error",
+        message: "User not found",
       });
       return;
     }
@@ -58,28 +51,21 @@ export const authMiddleware = async (
     next();
   } catch (error) {
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
-      status: 'error',
-      message: 'Invalid token',
+      status: "error",
+      message: "Invalid token",
     });
   }
 };
 
-export const optionalAuthMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const optionalAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return next();
     }
 
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(
-      token,
-      config.jwt.accessTokenSecret
-    ) as JwtPayload;
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, config.jwt.accessTokenSecret) as JwtPayload;
 
     const userDao = new UserDao();
     const user = await userDao.findById(decoded.userId);
@@ -91,4 +77,4 @@ export const optionalAuthMiddleware = async (
     // Continue without setting user
     next();
   }
-}; 
+};
